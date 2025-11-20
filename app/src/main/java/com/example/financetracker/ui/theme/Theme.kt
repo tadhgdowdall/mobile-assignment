@@ -1,4 +1,4 @@
-package com.example.greetingcard.ui.theme
+package com.example.financetracker.ui.theme
 
 import android.app.Activity
 import android.os.Build

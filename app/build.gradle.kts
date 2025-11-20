@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.greetingcard"
+    namespace = "com.example.financetracker"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.greetingcard"
+        applicationId = "com.example.financetracker"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

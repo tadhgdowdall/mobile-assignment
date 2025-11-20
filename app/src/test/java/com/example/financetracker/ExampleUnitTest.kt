@@ -1,4 +1,4 @@
-package com.example.greetingcard
+package com.example.financetracker
 
 import org.junit.Test
 
