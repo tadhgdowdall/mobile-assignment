@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class FinanceViewModel : ViewModel() {
 
+    //Managing all transactions
+    // Calculates balance
+    //Add, update, delete, and get transactions
     private val _transactions = MutableStateFlow<List<Transaction>>(emptyList())
     val transactions: StateFlow<List<Transaction>> = _transactions.asStateFlow()
 

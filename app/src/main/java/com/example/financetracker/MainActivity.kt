@@ -33,8 +33,18 @@ fun FinanceApp() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Onboarding.route
     ) {
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onSignIn = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 viewModel = viewModel,

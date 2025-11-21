@@ -2,6 +2,7 @@ package com.example.financetracker
 
 import java.util.UUID
 
+// Transaction data, amount, type (income, expense), note
 data class Transaction(
     val id: String = UUID.randomUUID().toString(),
     val amount: Double,
@@ -16,6 +17,7 @@ enum class TransactionType {
     EXPENSE
 }
 
+// Default categories
 object Categories {
     val expenseCategories = listOf(
         "Food",
