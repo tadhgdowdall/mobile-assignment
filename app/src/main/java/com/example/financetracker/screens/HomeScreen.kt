@@ -1,8 +1,16 @@
 package com.example.financetracker.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.financetracker.Categories
 import com.example.financetracker.FinanceViewModel
 import com.example.financetracker.Transaction
 import com.example.financetracker.TransactionType
@@ -29,95 +38,172 @@ fun HomeScreen(
 ) {
     val balance by viewModel.balance.collectAsState()
     val transactions by viewModel.transactions.collectAsState()
-    val recentTransactions = transactions.take(5)
+    val recentTransactions = transactions.take(3)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Finance Tracker") }
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Logo",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            fontSize = 18.sp
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onAddTransaction,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Transaction",
+                            tint = Color.White
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* Info/Help */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Info"
+                        )
+                    }
+                }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddTransaction) {
-                Text("+", fontSize = 24.sp)
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = true,
+                    onClick = { },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onViewAllTransactions,
+                    icon = { Text("$", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
+                    label = { Text("Transactions") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onViewAllTransactions,
+                    icon = { Text("🕐", fontSize = 20.sp) },
+                    label = { Text("History") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { /* Settings */ },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    label = { Text("Settings") }
+                )
             }
         }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            // Balance Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Total Balance",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "€%.2f".format(balance),
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (balance >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
-                    )
-                }
-            }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Recent Transactions Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                // Current Balance Section
                 Text(
-                    text = "Recent Transactions",
-                    fontSize = 20.sp,
+                    text = "Current Balance",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "€${String.format("%,.0f", balance)}",
+                    fontSize = 48.sp,
                     fontWeight = FontWeight.Bold
                 )
-                TextButton(onClick = onViewAllTransactions) {
-                    Text("View All")
-                }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Recent Transactions Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recent Transactions",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(onClick = onViewAllTransactions) {
+                        Text("See All")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             // Recent Transactions List
             if (recentTransactions.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No transactions yet",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn {
-                    items(recentTransactions) { transaction ->
-                        TransactionItem(
-                            transaction = transaction,
-                            onClick = { onTransactionClick(transaction.id) }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No transactions yet",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
+            } else {
+                items(recentTransactions) { transaction ->
+                    TransactionCard(
+                        transaction = transaction,
+                        onClick = { onTransactionClick(transaction.id) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Budget Overview Section
+                Text(
+                    text = "Budget Overview",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Budget Progress Bars
+            items(Categories.expenseCategories.take(3)) { category ->
+                BudgetProgressItem(
+                    category = category,
+                    spent = calculateCategorySpent(transactions, category),
+                    budget = 250.0
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -125,16 +211,22 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionItem(
+fun TransactionCard(
     transaction: Transaction,
     onClick: () -> Unit
 ) {
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     val formattedDate = dateFormat.format(Date(transaction.date))
 
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (transaction.type == TransactionType.EXPENSE)
+                Color(0xFFF3E5F5) // Light purple
+            else
+                MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -157,12 +249,52 @@ fun TransactionItem(
                 )
             }
             Text(
-                text = "${if (transaction.type == TransactionType.INCOME) "+" else "-"}€%.2f".format(transaction.amount),
+                text = "€%.2f".format(transaction.amount),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (transaction.type == TransactionType.INCOME)
-                    Color(0xFF4CAF50) else Color(0xFFF44336)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
+}
+
+@Composable
+fun BudgetProgressItem(
+    category: String,
+    spent: Double,
+    budget: Double
+) {
+    val progress = (spent / budget).coerceIn(0.0, 1.0).toFloat()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = category,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "€${String.format("%.0f", spent)}/€${String.format("%.0f", budget)}",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp),
+            color = if (progress > 0.8) Color(0xFFF44336) else MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+fun calculateCategorySpent(transactions: List<Transaction>, category: String): Double {
+    return transactions
+        .filter { it.type == TransactionType.EXPENSE && it.category == category }
+        .sumOf { it.amount }
 }

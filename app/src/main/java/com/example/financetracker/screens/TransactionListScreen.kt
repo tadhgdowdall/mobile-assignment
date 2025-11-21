@@ -47,7 +47,7 @@ fun TransactionListScreen(
                     .padding(16.dp)
             ) {
                 items(transactions.reversed()) { transaction ->
-                    TransactionItem(
+                    TransactionCard(
                         transaction = transaction,
                         onClick = { onTransactionClick(transaction.id) }
                     )
