@@ -1,7 +1,10 @@
 package com.example.financetracker.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -11,6 +14,8 @@ import com.example.financetracker.Categories
 import com.example.financetracker.FinanceViewModel
 import com.example.financetracker.Transaction
 import com.example.financetracker.TransactionType
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,6 +28,8 @@ fun AddTransactionScreen(
     var selectedCategory by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var expandedCategory by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
 
     val categories = if (selectedType == TransactionType.EXPENSE) {
         Categories.expenseCategories
@@ -34,6 +41,9 @@ fun AddTransactionScreen(
     LaunchedEffect(selectedType) {
         selectedCategory = categories.firstOrNull() ?: ""
     }
+
+    val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    val formattedDate = dateFormatter.format(Date(selectedDateMillis))
 
     Scaffold(
         topBar = {
@@ -120,6 +130,25 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Date Field
+            OutlinedTextField(
+                value = formattedDate,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Date") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Select Date"
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Note
             OutlinedTextField(
                 value = note,
@@ -140,6 +169,7 @@ fun AddTransactionScreen(
                             amount = amountValue,
                             type = selectedType,
                             category = selectedCategory,
+                            date = selectedDateMillis,
                             note = note
                         )
                         viewModel.addTransaction(transaction)
@@ -151,6 +181,35 @@ fun AddTransactionScreen(
             ) {
                 Text("Save Transaction")
             }
+        }
+    }
+
+    // Date Picker Dialog
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDateMillis
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            selectedDateMillis = it
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
