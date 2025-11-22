@@ -77,6 +77,9 @@ fun FinanceApp() {
                 },
                 onTransactionClick = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
+                },
+                onAddTransaction = {
+                    navController.navigate(Screen.AddTransaction.route)
                 }
             )
         }
