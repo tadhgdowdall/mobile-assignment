@@ -34,7 +34,8 @@ fun HomeScreen(
     viewModel: FinanceViewModel,
     onAddTransaction: () -> Unit,
     onViewAllTransactions: () -> Unit,
-    onTransactionClick: (String) -> Unit
+    onTransactionClick: (String) -> Unit,
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val balance by viewModel.balance.collectAsState()
     val transactions by viewModel.transactions.collectAsState()
@@ -104,7 +105,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* Settings */ },
+                    onClick = onNavigateToSettings,
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                     label = { Text("Settings") }
                 )

@@ -56,6 +56,9 @@ fun FinanceApp() {
                 },
                 onTransactionClick = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
@@ -89,6 +92,14 @@ fun FinanceApp() {
             TransactionDetailScreen(
                 transactionId = transactionId,
                 viewModel = viewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
