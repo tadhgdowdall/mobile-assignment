@@ -57,6 +57,9 @@ fun FinanceApp() {
                 onTransactionClick = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
                 },
+                onNavigateToBudget = {
+                    navController.navigate(Screen.Budget.route)
+                },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 }
@@ -94,6 +97,23 @@ fun FinanceApp() {
                 viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.Budget.route) {
+            BudgetScreen(
+                viewModel = viewModel,
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                },
+                onNavigateToTransactions = {
+                    navController.navigate(Screen.TransactionList.route)
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }

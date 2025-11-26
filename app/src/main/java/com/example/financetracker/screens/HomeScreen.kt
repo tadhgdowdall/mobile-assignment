@@ -35,6 +35,7 @@ fun HomeScreen(
     onAddTransaction: () -> Unit,
     onViewAllTransactions: () -> Unit,
     onTransactionClick: (String) -> Unit,
+    onNavigateToBudget: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     val balance by viewModel.balance.collectAsState()
@@ -99,9 +100,9 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = onViewAllTransactions,
-                    icon = { Text("🕐", fontSize = 20.sp) },
-                    label = { Text("History") }
+                    onClick = onNavigateToBudget,
+                    icon = { Text("💰", fontSize = 20.sp) },
+                    label = { Text("Budget") }
                 )
                 NavigationBarItem(
                     selected = false,
@@ -294,7 +295,7 @@ fun BudgetProgressItem(
     }
 }
 
-fun calculateCategorySpent(transactions: List<Transaction>, category: String): Double {
+private fun calculateCategorySpent(transactions: List<Transaction>, category: String): Double {
     return transactions
         .filter { it.type == TransactionType.EXPENSE && it.category == category }
         .sumOf { it.amount }
