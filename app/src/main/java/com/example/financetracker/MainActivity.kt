@@ -5,11 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.financetracker.data.AppDatabase
+import com.example.financetracker.data.TransactionRepository
 import com.example.financetracker.screens.*
 import com.example.financetracker.ui.theme.MobileDevelopmentTheme
 
@@ -29,7 +32,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FinanceApp() {
     val navController = rememberNavController()
-    val viewModel: FinanceViewModel = viewModel()
+
+    // Get the application context for database initialization
+    val context = LocalContext.current
+
+    // Initialize the database (singleton pattern ensures only one instance)
+    val database = AppDatabase.getDatabase(context)
+
+    // Create the repository with the DAO from the database
+    val repository = TransactionRepository(database.transactionDao())
+
+    // Create the ViewModel using the factory with the repository
+    val viewModel: FinanceViewModel = viewModel(
+        factory = FinanceViewModelFactory(repository)
+    )
 
     NavHost(
         navController = navController,

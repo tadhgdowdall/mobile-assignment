@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // KSP (Kotlin Symbol Processing) - Required for Room code generation
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -51,6 +53,19 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation(libs.androidx.room.ktx)
+
+    // Room Database - Local data persistence
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion") // Kotlin extensions and Coroutines support
+    ksp("androidx.room:room-compiler:$roomVersion") // Annotation processor for Room
+
+    // DataStore - Key-value storage (alternative to SharedPreferences)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // ViewModel with Compose integration
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
