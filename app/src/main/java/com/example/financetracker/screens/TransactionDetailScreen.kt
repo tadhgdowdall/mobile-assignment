@@ -1,11 +1,14 @@
 package com.example.financetracker.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.financetracker.FinanceViewModel
@@ -22,6 +25,11 @@ fun TransactionDetailScreen(
 ) {
     val transaction = viewModel.getTransaction(transactionId)
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
+
+    // Editable state
+    var editAmount by remember { mutableStateOf("") }
+    var editNote by remember { mutableStateOf("") }
 
     if (transaction == null) {
         // Transaction not found
@@ -34,16 +42,46 @@ fun TransactionDetailScreen(
         return
     }
 
+    // Initialize edit fields
+    LaunchedEffect(transaction) {
+        editAmount = transaction.amount.toString()
+        editNote = transaction.note
+    }
+
     val dateFormat = SimpleDateFormat("MMMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
     val formattedDate = dateFormat.format(Date(transaction.date))
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Transaction Details") },
+                title = { Text(if (isEditing) "Edit Transaction" else "Transaction Details") },
                 navigationIcon = {
                     TextButton(onClick = onNavigateBack) {
                         Text("Back")
+                    }
+                },
+                actions = {
+                    if (isEditing) {
+                        TextButton(
+                            onClick = {
+                                // Save changes
+                                val newAmount = editAmount.toDoubleOrNull()
+                                if (newAmount != null && newAmount > 0) {
+                                    val updatedTransaction = transaction.copy(
+                                        amount = newAmount,
+                                        note = editNote
+                                    )
+                                    viewModel.updateTransaction(updatedTransaction)
+                                    isEditing = false
+                                }
+                            }
+                        ) {
+                            Text("Save")
+                        }
+                    } else {
+                        TextButton(onClick = { isEditing = true }) {
+                            Text("Edit")
+                        }
                     }
                 }
             )
@@ -74,15 +112,30 @@ fun TransactionDetailScreen(
                         fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "€%.2f".format(transaction.amount),
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (transaction.type == TransactionType.INCOME)
-                            Color(0xFF4CAF50)
-                        else
-                            Color(0xFFF44336)
-                    )
+
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = editAmount,
+                            onValueChange = { editAmount = it },
+                            label = { Text("Amount (€)") },
+                            textStyle = TextStyle(
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(
+                            text = "€%.2f".format(transaction.amount),
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (transaction.type == TransactionType.INCOME)
+                                Color(0xFF4CAF50)
+                            else
+                                Color(0xFFF44336)
+                        )
+                    }
                 }
             }
 
@@ -93,8 +146,18 @@ fun TransactionDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
             DetailRow(label = "Date", value = formattedDate)
 
-            if (transaction.note.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Note field - editable
+            if (isEditing) {
+                OutlinedTextField(
+                    value = editNote,
+                    onValueChange = { editNote = it },
+                    label = { Text("Note (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            } else if (transaction.note.isNotBlank()) {
                 DetailRow(label = "Note", value = transaction.note)
             }
 
