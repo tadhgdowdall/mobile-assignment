@@ -51,7 +51,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Logo",
+                            "FinanceTracker",
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             fontSize = 18.sp
                         )

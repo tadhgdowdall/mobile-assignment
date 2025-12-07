@@ -67,6 +67,15 @@ dependencies {
     // ViewModel with Compose integration
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    // CameraX - Simple camera integration
+    val cameraxVersion = "1.3.1"
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Accompanist - Permissions handling
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

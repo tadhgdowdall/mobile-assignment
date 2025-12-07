@@ -87,6 +87,17 @@ fun FinanceApp() {
                 viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onOpenCamera = {
+                    navController.navigate(Screen.Camera.route)
+                }
+            )
+        }
+
+        composable(Screen.Camera.route) {
+            CameraScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
