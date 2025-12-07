@@ -11,14 +11,24 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.financetracker.data.AppDatabase
 import com.example.financetracker.data.TransactionRepository
 import com.example.financetracker.screens.*
 import com.example.financetracker.ui.theme.MobileDevelopmentTheme
+import com.example.financetracker.workers.BudgetCheckWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Schedule daily budget check
+        scheduleDailyBudgetCheck()
+
         setContent {
             MobileDevelopmentTheme {
                 Surface {
@@ -26,6 +36,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun scheduleDailyBudgetCheck() {
+        val workRequest = PeriodicWorkRequestBuilder<BudgetCheckWorker>(
+            1, TimeUnit.DAYS
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "daily_budget_check",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
     }
 }
 
@@ -149,6 +171,11 @@ fun FinanceApp() {
             SettingsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onTestBudgetCheck = {
+                    // Trigger one-time worker immediately for testing
+                    val testWorkRequest = OneTimeWorkRequestBuilder<BudgetCheckWorker>().build()
+                    WorkManager.getInstance(context).enqueue(testWorkRequest)
                 }
             )
         }

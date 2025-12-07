@@ -105,4 +105,12 @@ interface TransactionDao {
      */
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
+
+    /**
+     * READ - Get transactions within a date range
+     *
+     * Used for budget checking and reports
+     */
+    @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    suspend fun getTransactionsInDateRange(startDate: Long, endDate: Long): List<Transaction>
 }

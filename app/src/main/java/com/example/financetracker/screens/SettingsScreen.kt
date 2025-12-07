@@ -1,5 +1,8 @@
 package com.example.financetracker.screens
 
+import android.Manifest
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,15 +15,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onTestBudgetCheck: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
+    // Request notification permission for Android 13+
+    val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        null
+    }
+
     // Local state for settings
     var pushNotificationsEnabled by remember { mutableStateOf(true) }
     var budgetAlertsEnabled by remember { mutableStateOf(false) }
@@ -169,11 +186,11 @@ fun SettingsScreen(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
                             onClick = { /* Export data functionality */ },
@@ -181,6 +198,33 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 "Export Data",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                // Request permission first if needed
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    if (notificationPermission?.status?.isGranted == true) {
+                                        onTestBudgetCheck()
+                                        Toast.makeText(context, "Budget check triggered! Wait a few seconds...", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        notificationPermission?.launchPermissionRequest()
+                                    }
+                                } else {
+                                    onTestBudgetCheck()
+                                    Toast.makeText(context, "Budget check triggered! Wait a few seconds...", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Text(
+                                "Test Budget Check",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
                             )
